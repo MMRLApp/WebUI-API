@@ -29,15 +29,20 @@ export function NativeMethod<T = void>(options?: NativeDecoratorOptions<T>) {
         return defaultValue;
       }
 
-      if (
-        typeof requireVersion === "number" &&
-        access &&
-        access.getBuildConfig().getVersionCode() < requireVersion
-      ) {
-        console.warn(
-          `Method ${key} requires MMRL version ${requireVersion} or higher!`
-        );
-        return defaultValue;
+      if (typeof requireVersion === "number") {
+        const access = window["mmrl"] as MMRL | undefined;
+
+        if (!access) {
+          console.warn("MMRL is not available!");
+          return defaultValue;
+        }
+
+        if (access.getBuildConfig().getVersionCode() < requireVersion) {
+          console.warn(
+            `Method ${key} requires MMRL version ${requireVersion} or higher!`
+          );
+          return defaultValue;
+        }
       }
 
       return originalMethod.apply(this, args);

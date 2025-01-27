@@ -23,17 +23,20 @@ export function NativeProperty<T = void>(options?: NativeDecoratorOptions<T>) {
         return defaultValue;
       }
 
-      const access = window["mmrl"] as MMRL | undefined;
+      if (typeof requireVersion === "number") {
+        const access = window["mmrl"] as MMRL | undefined;
 
-      if (
-        typeof requireVersion === "number" &&
-        access &&
-        access.getBuildConfig().getVersionCode() < requireVersion
-      ) {
-        console.warn(
-          `Method ${propertyKey} requires MMRL version ${requireVersion} or higher!`
-        );
-        return defaultValue;
+        if (!access) {
+          console.warn("MMRL is not available!");
+          return defaultValue;
+        }
+
+        if (access.getBuildConfig().getVersionCode() < requireVersion) {
+          console.warn(
+            `Method ${propertyKey} requires MMRL version ${requireVersion} or higher!`
+          );
+          return defaultValue;
+        }
       }
 
       return value;
@@ -42,7 +45,7 @@ export function NativeProperty<T = void>(options?: NativeDecoratorOptions<T>) {
     const setter = (newValue: any) => {
       if (deprecated) {
         console.warn(
-          `Method ${propertyKey} is deprecated! ${deprecatedMessage}`
+          `Get Method ${propertyKey} is deprecated! ${deprecatedMessage}`
         );
       }
 
@@ -50,11 +53,20 @@ export function NativeProperty<T = void>(options?: NativeDecoratorOptions<T>) {
         return;
       }
 
-      if (typeof requireVersion === "number" && 33050 < requireVersion) {
-        console.warn(
-          `Method ${propertyKey} requires MMRL version ${requireVersion} or higher!`
-        );
-        return;
+      if (typeof requireVersion === "number") {
+        const access = window["mmrl"] as MMRL | undefined;
+
+        if (!access) {
+          console.warn("MMRL is not available!");
+          return defaultValue;
+        }
+
+        if (access.getBuildConfig().getVersionCode() < requireVersion) {
+          console.warn(
+            `Set Method ${propertyKey} requires MMRL version ${requireVersion} or higher!`
+          );
+          return defaultValue;
+        }
       }
 
       value = newValue;
