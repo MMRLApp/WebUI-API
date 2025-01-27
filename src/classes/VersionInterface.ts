@@ -1,50 +1,75 @@
-import { NativeProperty } from "../decorators/NativeProperty";
 import { MMRLObjectAccessor } from "./MMRLObjectAccessor";
 
-class VersionInterface extends MMRLObjectAccessor<MMRL> {
+class VersionInterface extends MMRLObjectAccessor<MMRL | undefined> {
   public constructor() {
     super(window["mmrl"] as object);
   }
 
   /**
-   * @public
+   * @private
    * @readonly
    */
-  @NativeProperty({
-    default: {
-      applicationId: "",
-      versionName: "",
-      versionCode: 0,
-      buildType: "",
-      isDevVersion: false,
-      isGooglePlayBuild: false,
-    },
-  })
-  public readonly app = {
-    applicationId: this.interface.getBuildConfig().getApplicationId(),
-    versionName: this.interface.getBuildConfig().getVersionName(),
-    versionCode: this.interface.getBuildConfig().getVersionCode(),
-    buildType: this.interface.getBuildConfig().getBuildType(),
-    isDevVersion: this.interface.getBuildConfig().isDevVersion(),
-    isGooglePlayBuild: this.interface.getBuildConfig().isGooglePlayBuild(),
-  };
+  private readonly defaultNumber = -1;
 
   /**
-   * @public
+   * @private
    * @readonly
    */
-  @NativeProperty({
-    default: {
-      platform: "",
-      versionName: "",
-      versionCode: 0,
-    },
-  })
-  public readonly root = {
-    platform: this.interface.getRootConfig().getPlatform(),
-    versionName: this.interface.getRootConfig().getVersionName(),
-    versionCode: this.interface.getRootConfig().getVersionCode(),
-  };
+  private readonly defaultString = -1;
+
+  public get versionCode() {
+    if (!this.isMMRL || !this.interface) return this.defaultNumber;
+
+    return this.interface.getBuildConfig().getVersionCode();
+  }
+
+  public get versionName() {
+    if (!this.isMMRL || !this.interface) return this.defaultString;
+
+    return this.interface.getBuildConfig().getVersionName();
+  }
+
+  public get applicationId() {
+    if (!this.isMMRL || !this.interface) return this.defaultString;
+
+    return this.interface.getBuildConfig().getApplicationId();
+  }
+
+  public get buildType() {
+    if (!this.isMMRL || !this.interface) return this.defaultString;
+
+    return this.interface.getBuildConfig().getBuildType();
+  }
+
+  public get isDevVersion() {
+    if (!this.isMMRL || !this.interface) return false;
+
+    return this.interface.getBuildConfig().isDevVersion();
+  }
+
+  public get isGooglePlayBuild() {
+    if (!this.isMMRL || !this.interface) return false;
+
+    return this.interface.getBuildConfig().isGooglePlayBuild();
+  }
+
+  public get platform() {
+    if (!this.isMMRL || !this.interface) return this.defaultString;
+
+    return this.interface.getRootConfig().getPlatform();
+  }
+
+  public get rootVersionCode() {
+    if (!this.isMMRL || !this.interface) return this.defaultNumber;
+
+    return this.interface.getRootConfig().getVersionCode();
+  }
+
+  public get rootVersionName() {
+    if (!this.isMMRL || !this.interface) return this.defaultString;
+
+    return this.interface.getRootConfig().getVersionName();
+  }
 }
 
 export const mmrl = new VersionInterface();

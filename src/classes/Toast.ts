@@ -1,20 +1,17 @@
-import { NativeMethod } from "../decorators/NativeMethod";
 import { ToastImpl } from "../types";
 import { MMRLObjectAccessor } from "./MMRLObjectAccessor";
-
-const requireVersion = 33049;
 
 /**
  * Class representing a native Toast notification.
  * @extends MMRLObjectAccessor
  */
-export class Toast extends MMRLObjectAccessor<MMRL> {
+export class Toast extends MMRLObjectAccessor<MMRL | undefined> {
   /**
    * @private
    * @readonly
    * @type {ToastImpl}
    */
-  private readonly toastBuilder: ToastImpl;
+  private readonly toastBuilder: ToastImpl | undefined;
 
   /**
    * Short duration for the toast.
@@ -38,10 +35,20 @@ export class Toast extends MMRLObjectAccessor<MMRL> {
   private duration: number = Toast.LENGTH_SHORT;
 
   /**
+   * The required MMRL version for the Toast class.
+   * @private
+   * @readonly
+   */
+  private readonly requireVersion = 33049;
+
+  /**
    * Creates an instance of Toast.
    */
   public constructor() {
     super(window["mmrl"] as object);
+
+    if (!this.interface) return;
+
     this.toastBuilder = this.interface.toastBuilder.bind(this.interface)();
   }
 
@@ -50,8 +57,10 @@ export class Toast extends MMRLObjectAccessor<MMRL> {
    * @param {string} text - The text to display. @throws If text is not a string.
    * @requires MMRL version `33049` or higher.
    */
-  @NativeMethod({ requireVersion })
   public setText(text: string): void {
+    if (!this.isMMRL || !this.toastBuilder) return;
+    if (!this.hasRequiredVersion(this.requireVersion)) return;
+
     if (typeof text !== "string") {
       throw new TypeError("Text must be a string");
     }
@@ -66,8 +75,10 @@ export class Toast extends MMRLObjectAccessor<MMRL> {
    * @throws If the duration is invalid.
    * @requires MMRL version `33049` or higher.
    */
-  @NativeMethod({ requireVersion })
   public setDuration(duration: number): void {
+    if (!this.isMMRL || !this.toastBuilder) return;
+    if (!this.hasRequiredVersion(this.requireVersion)) return;
+
     if (typeof duration !== "number") {
       throw new TypeError("Duration must be a number");
     }
@@ -87,8 +98,10 @@ export class Toast extends MMRLObjectAccessor<MMRL> {
    * @param {number} yOffset - The y offset of the toast. @throws If yOffset is not a valid number.
    * @requires MMRL version `33049` or higher.
    */
-  @NativeMethod({ requireVersion })
   public setGravity(gravity: number, xOffset: number, yOffset: number): void {
+    if (!this.isMMRL || !this.toastBuilder) return;
+    if (!this.hasRequiredVersion(this.requireVersion)) return;
+
     if (typeof gravity !== "number") {
       throw new TypeError("Gravity must be a number");
     }
@@ -108,8 +121,10 @@ export class Toast extends MMRLObjectAccessor<MMRL> {
    * Shows the toast.
    * @requires MMRL version `33049` or higher.
    */
-  @NativeMethod({ requireVersion })
   public show(): void {
+    if (!this.isMMRL || !this.toastBuilder) return;
+    if (!this.hasRequiredVersion(this.requireVersion)) return;
+
     this.toastBuilder.show();
   }
 
@@ -117,8 +132,10 @@ export class Toast extends MMRLObjectAccessor<MMRL> {
    * Cancels the toast.
    * @requires MMRL version `33049` or higher.
    */
-  @NativeMethod({ requireVersion })
   public cancel(): void {
+    if (!this.isMMRL || !this.toastBuilder) return;
+    if (!this.hasRequiredVersion(this.requireVersion)) return;
+
     this.toastBuilder.cancel();
   }
 
@@ -129,7 +146,6 @@ export class Toast extends MMRLObjectAccessor<MMRL> {
    * @requires MMRL version `33049` or higher.
    * @returns {Toast} The created Toast instance.
    */
-  @NativeMethod({ requireVersion })
   public static makeText(
     text: string,
     duration: number = Toast.LENGTH_SHORT

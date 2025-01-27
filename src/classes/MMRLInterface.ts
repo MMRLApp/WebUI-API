@@ -1,5 +1,3 @@
-import { NativeMethod } from "../decorators/NativeMethod";
-import { NativeProperty } from "../decorators/NativeProperty";
 import type { Manager, MimeType, ObjectScope } from "../types";
 import { AccessorScope } from "../util/AccessorScope";
 import { MMRLObjectAccessor } from "./MMRLObjectAccessor";
@@ -28,6 +26,10 @@ export interface MMRLInterfaceImpl {
   requestFileSystemAPI(): void;
 }
 
+interface MMRLInterfaceOptions {
+  noScopeParse?: boolean;
+}
+
 /**
  * Class representing the MMRL interface.
  * Extends the MMRLObjectAccessor class to provide additional functionality specific to MMRL.
@@ -43,8 +45,11 @@ export class MMRLInterface extends MMRLObjectAccessor<MMRLInterfaceImpl> {
    * @example
    * const mmrl = MMRLInterfaceFactory("net-switch");
    */
-  public constructor(scope: ObjectScope) {
-    const parsedScope = AccessorScope.parseScope(scope);
+  public constructor(scope: ObjectScope, options?: MMRLInterfaceOptions) {
+    const parsedScope = options?.noScopeParse
+      ? window[`$${scope}`]
+      : AccessorScope.parseScope(scope);
+
     super(parsedScope);
   }
 
@@ -53,11 +58,8 @@ export class MMRLInterface extends MMRLObjectAccessor<MMRLInterfaceImpl> {
    * @example
    * mmrl.injectStyleSheets();
    */
-  @NativeMethod()
   public injectStyleSheets() {
-    if (!this.isMMRL) {
-      return;
-    }
+    if (!this.isMMRL) return;
 
     const stylesheets = [
       "https://mui.kernelsu.org/mmrl/insets.css",
@@ -82,32 +84,28 @@ export class MMRLInterface extends MMRLObjectAccessor<MMRLInterfaceImpl> {
   /**
    * Gets the manager information.
    * @returns {Manager | null} The manager information or null if not available.
+   * @deprecated
    * @example
    * console.log(mmrl.manager);
    */
-  @NativeProperty({
-    default: null,
-    deprecated: true,
-    deprecatedMessage: "Please use the new MMRL Version API.",
-  })
-  public readonly manager: Manager | null = this.parseJSON<Manager>(
-    this.interface.getManager()
-  );
+  public get manager(): Manager | null {
+    if (!this.isMMRL) return null;
+
+    return this.parseJSON<Manager>(this.interface.getManager());
+  }
 
   /**
    * Gets the MMRL information.
    * @returns {Manager | null} The MMRL information or null if not available.
+   * @deprecated
    * @example
    * console.log(mmrl.mmrl);
    */
-  @NativeProperty({
-    default: null,
-    deprecated: true,
-    deprecatedMessage: "Please use the new MMRL Version API.",
-  })
-  public readonly mmrl: Manager | null = this.parseJSON<Manager>(
-    this.interface.getMmrl()
-  );
+  public get mmrl(): Manager | null {
+    if (!this.isMMRL) return null;
+
+    return this.parseJSON<Manager>(this.interface.getMmrl());
+  }
 
   /**
    * Checks if the interface has access to the file system.
@@ -115,9 +113,11 @@ export class MMRLInterface extends MMRLObjectAccessor<MMRLInterfaceImpl> {
    * @example
    * console.log(mmrl.hasAccessToFileSystem);
    */
-  @NativeProperty({ default: false })
-  public hasAccessToFileSystem: boolean =
-    this.interface.getHasAccessToFileSystem();
+  public get hasAccessToFileSystem(): boolean {
+    if (!this.isMMRL) return false;
+
+    return this.interface.getHasAccessToFileSystem();
+  }
 
   /**
    * Checks if the interface has access to the advanced kernel SU API.
@@ -125,9 +125,11 @@ export class MMRLInterface extends MMRLObjectAccessor<MMRLInterfaceImpl> {
    * @example
    * console.log(mmrl.hasAccessToAdvancedKernelSuAPI);
    */
-  @NativeProperty({ default: true })
-  public hasAccessToAdvancedKernelSuAPI: boolean =
-    this.interface.getHasAccessToAdvancedKernelSuAPI();
+  public get hasAccessToAdvancedKernelSuAPI(): boolean {
+    if (!this.isMMRL) return true;
+
+    return this.interface.getHasAccessToAdvancedKernelSuAPI();
+  }
 
   /**
    * Gets the top inset of the window.
@@ -135,8 +137,11 @@ export class MMRLInterface extends MMRLObjectAccessor<MMRLInterfaceImpl> {
    * @example
    * console.log(mmrl.windowTopInset);
    */
-  @NativeProperty({ default: 0 })
-  public readonly windowTopInset: number = this.interface.getWindowTopInset();
+  public get windowTopInset(): number {
+    if (!this.isMMRL) return 0;
+
+    return this.interface.getWindowTopInset();
+  }
 
   /**
    * Gets the bottom inset of the window.
@@ -144,9 +149,11 @@ export class MMRLInterface extends MMRLObjectAccessor<MMRLInterfaceImpl> {
    * @example
    * console.log(mmrl.windowBottomInset);
    */
-  @NativeProperty({ default: 0 })
-  public readonly windowBottomInset: number =
-    this.interface.getWindowBottomInset();
+  public get windowBottomInset(): number {
+    if (!this.isMMRL) return 0;
+
+    return this.interface.getWindowBottomInset();
+  }
 
   /**
    * Checks if the navigation bars are light.
@@ -166,8 +173,11 @@ export class MMRLInterface extends MMRLObjectAccessor<MMRLInterfaceImpl> {
    * @example
    * console.log(mmrl.darkMode);
    */
-  @NativeProperty({ default: false })
-  public readonly darkMode: boolean = this.interface.isDarkMode();
+  public get darkMode(): boolean {
+    if (!this.isMMRL) return false;
+
+    return this.interface.isDarkMode();
+  }
 
   /**
    * Sets the navigation bars to light or dark.
@@ -211,8 +221,11 @@ export class MMRLInterface extends MMRLObjectAccessor<MMRLInterfaceImpl> {
    * @example
    * console.log(mmrl.sdk);
    */
-  @NativeProperty({ default: 0 })
-  public readonly sdk: number = this.interface.getSdk();
+  public get sdk(): number {
+    if (!this.isMMRL) return -1;
+
+    return this.interface.getSdk();
+  }
 
   /**
    * Shares text with an optional MIME type.
@@ -222,17 +235,22 @@ export class MMRLInterface extends MMRLObjectAccessor<MMRLInterfaceImpl> {
    * mmrl.shareText("Hello, world!");
    * mmrl.shareText("Hello, world!", "text/plain");
    */
-  @NativeMethod()
   public shareText(text: string, type?: MimeType) {
-    if (this.isMMRL) {
-      if (type === undefined) {
-        this.interface.shareText(text);
-        return;
-      }
+    if (!this.isMMRL) return;
 
-      this.interface.shareText(text, type);
+    if (type === undefined) {
+      this.interface.shareText(text);
+      return;
     }
+
+    this.interface.shareText(text, type);
   }
+
+  /**
+   * @private
+   * @readonly
+   */
+  private readonly requireVersionNewAPIs = 33045;
 
   /**
    * Requests access to the advanced kernel SU API.
@@ -241,8 +259,10 @@ export class MMRLInterface extends MMRLObjectAccessor<MMRLInterfaceImpl> {
    * it proceeds to request the advanced kernel SU API through the interface.
    * @requires MMRL version `33045` or higher.
    */
-  @NativeMethod({ requireVersion: 33045 })
   public requestAdvancedKernelSUAPI() {
+    if (!this.isMMRL) return;
+    if (!this.hasRequiredVersion(this.requireVersionNewAPIs)) return;
+
     this.interface.requestAdvancedKernelSUAPI();
   }
 
@@ -251,8 +271,10 @@ export class MMRLInterface extends MMRLObjectAccessor<MMRLInterfaceImpl> {
    * If access to the file system is granted, it triggers the recompose method.
    * @requires MMRL version `33045` or higher.
    */
-  @NativeMethod({ requireVersion: 33045 })
   public requestFileSystemAPI() {
+    if (!this.isMMRL) return;
+    if (!this.hasRequiredVersion(this.requireVersionNewAPIs)) return;
+
     this.interface.requestFileSystemAPI();
   }
 }
@@ -264,6 +286,9 @@ export class MMRLInterface extends MMRLObjectAccessor<MMRLInterfaceImpl> {
  * @example
  * const mmrl = MMRLInterfaceFactory("net-switch");
  */
-export function MMRLInterfaceFactory(scope: ObjectScope): MMRLInterface {
-  return new MMRLInterface(scope);
+export function MMRLInterfaceFactory(
+  scope: ObjectScope,
+  options?: MMRLInterfaceOptions
+): MMRLInterface {
+  return new MMRLInterface(scope, options);
 }

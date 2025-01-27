@@ -67,6 +67,28 @@ export class MMRLObjectAccessor<I = any> {
     return this.userAgentName === this.userAgent;
   }
 
+  protected hasRequiredVersion(version: number): boolean {
+    if (!this.isMMRL) {
+      console.warn("MMRL is not available!");
+      return false;
+    }
+
+    const access = window["mmrl"] as MMRL | undefined;
+
+    if (!access) {
+      console.warn("MMRL is not available!");
+      return false;
+    }
+
+
+    if (access.getBuildConfig().getVersionCode() < version) {
+      console.warn(`Method requires MMRL version ${version} or higher!`);
+      return false;
+    }
+
+    return true;
+  }
+
   /**
    * Checks if the current environment is MMRL.
    *
