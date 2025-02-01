@@ -23,7 +23,14 @@ export const AccessorScope = {
 
   parseScope(scope: ObjectScope): object {
     if (typeof scope === "string") {
-      return window[`$${this.sanitizeScope(scope)}`];
+      const sanitizedScope = window[`$${this.sanitizeScope(scope)}`];
+      const unsanitizedScope = window[`$${scope}`];
+
+      if (typeof sanitizedScope !== "undefined") {
+        return sanitizedScope;
+      } else {
+        return unsanitizedScope;
+      }
     }
 
     return scope;

@@ -77,7 +77,7 @@ Example usage:
 ```typescript
 import { FileSystem } from "mmrl";
 
-const fs = new FileSystem();
+const fs = new FileSystem("net-switch");
 fs.write("example.txt", "Hello, MMRL!");
 const content = fs.read("example.txt");
 console.log(content);
