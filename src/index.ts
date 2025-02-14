@@ -6,5 +6,7 @@ export { AccessorScope } from "./util/AccessorScope";
 export { MMRLObjectAccessor } from "./classes/MMRLObjectAccessor";
 export { MMRLInterface, MMRLInterfaceFactory } from "./classes/MMRLInterface";
 export { FileSystem, FileSystemFactory } from "./classes/FileSystem";
+export { Config } from "./classes/Config";
+export { Path } from "./classes/Path";
 export { Toast } from "./classes/Toast";
 export { mmrl } from "./classes/VersionInterface";

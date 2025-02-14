@@ -18,6 +18,16 @@ export interface FileSystemImpl {
   stat(path: string, total: boolean): number;
   delete(path: string): boolean;
   exists(path: string): boolean;
+  isDirectory(path: string): boolean;
+  isFile(path: string): boolean;
+  mkdir(path: string): boolean;
+  mkdirs(path: string): boolean;
+  createNewFile(path: string): boolean;
+  renameTo(target: string, dest: string): boolean;
+  copyTo(target: string, dest: string, overwrite: boolean): boolean;
+  canExecute(path: string): boolean;
+  canRead(path: string): boolean;
+  isHidden(path: string): boolean;
 }
 
 /**
@@ -38,6 +48,12 @@ export class FileSystem extends MMRLObjectAccessor<FileSystemImpl> {
     const parsedScope = AccessorScope.parseFileScope(scope);
     super(parsedScope);
   }
+
+  /**
+   * @private
+   * @readonly
+   */
+  private readonly advancedFsOperations = 33162;
 
   /**
    * Reads the content of a file.
@@ -157,6 +173,178 @@ export class FileSystem extends MMRLObjectAccessor<FileSystemImpl> {
     }
 
     return false;
+  }
+
+  private _unsupportedWarning(method: string) {
+    console.warn(`'${method}' is not supported on this version`);
+    return false;
+  }
+
+  /**
+   * Checks if a path is a directory.
+   * @param {string} path - The path to the file or directory.
+   * @returns {boolean} True if the path is a directory, otherwise false.
+   * @example
+   * console.log(fileSystem.isDirectory("/path/to/directory"));
+   */
+  public isDirectory(path: string): boolean {
+    if (!this.isMMRL) return false;
+    if (!this.hasRequiredVersion(this.advancedFsOperations)) {
+      return this._unsupportedWarning("isDirectroy");
+    }
+
+    return this.interface.isDirectory(path);
+  }
+
+  /**
+   * Checks if a path is a file.
+   * @param {string} path - The path to the file or directory.
+   * @returns {boolean} True if the path is a file, otherwise false.
+   * @example
+   * console.log(fileSystem.isFile("/path/to/file"));
+   */
+  public isFile(path: string): boolean {
+    if (!this.isMMRL) return false;
+    if (!this.hasRequiredVersion(this.advancedFsOperations)) {
+      return this._unsupportedWarning("isFile");
+    }
+
+    return this.interface.isFile(path);
+  }
+
+  /**
+   * Creates a directory.
+   * @param {string} path - The path to the directory.
+   * @returns {boolean} True if the directory was created, otherwise false.
+   * @example
+   * console.log(fileSystem.mkdir("/path/to/directory"));
+   */
+  public mkdir(path: string): boolean {
+    if (!this.isMMRL) return false;
+    if (!this.hasRequiredVersion(this.advancedFsOperations)) {
+      return this._unsupportedWarning("mkdir");
+    }
+
+    return this.interface.mkdir(path);
+  }
+
+  /**
+   * Creates a directory and any necessary parent directories.
+   * @param {string} path - The path to the directory.
+   * @returns {boolean} True if the directory was created, otherwise false.
+   * @example
+   * console.log(fileSystem.mkdirs("/path/to/directory"));
+   */
+  public mkdirs(path: string): boolean {
+    if (!this.isMMRL) return false;
+    if (!this.hasRequiredVersion(this.advancedFsOperations)) {
+      return this._unsupportedWarning("mkdirs");
+    }
+
+    return this.interface.mkdirs(path);
+  }
+
+  /**
+   * Creates a new file.
+   * @param {string} path - The path to the file.
+   * @returns {boolean} True if the file was created, otherwise false.
+   * @example
+   * console.log(fileSystem.createNewFile("/path/to/file"));
+   */
+  public createNewFile(path: string): boolean {
+    if (!this.isMMRL) return false;
+    if (!this.hasRequiredVersion(this.advancedFsOperations)) {
+      return this._unsupportedWarning("createNewFile");
+    }
+
+    return this.interface.createNewFile(path);
+  }
+
+  /**
+   * Renames a file or directory.
+   * @param {string} target - The path to the file or directory.
+   * @param {string} dest - The new path to the file or directory.
+   * @returns {boolean} True if the file or directory was renamed, otherwise false.
+   * @example
+   * console.log(fileSystem.renameTo("/path/to/file", "/new/path/to/file"));
+   */
+  public renameTo(target: string, dest: string): boolean {
+    if (!this.isMMRL) return false;
+    if (!this.hasRequiredVersion(this.advancedFsOperations)) {
+      return this._unsupportedWarning("renameTo");
+    }
+
+    return this.interface.renameTo(target, dest);
+  }
+
+  /**
+   * Copies a file or directory.
+   * @param {string} target - The path to the file or directory.
+   * @param {string} dest - The new path to the file or directory.
+   * @param {boolean} [overwrite=false] - Whether to overwrite the destination.
+   * @returns {boolean} True if the file or directory was copied, otherwise false.
+   * @example
+   * console.log(fileSystem.copyTo("/path/to/file", "/new/path/to/file"));
+   */
+  public copyTo(
+    target: string,
+    dest: string,
+    overwrite: boolean = false
+  ): boolean {
+    if (!this.isMMRL) return false;
+    if (!this.hasRequiredVersion(this.advancedFsOperations)) {
+      return this._unsupportedWarning("copyTo");
+    }
+
+    return this.interface.copyTo(target, dest, overwrite);
+  }
+
+  /**
+   * Checks if a file or directory can be executed.
+   * @param {string} path - The path to the file or directory.
+   * @returns {boolean} True if the file or directory can be executed, otherwise false.
+   * @example
+   * console.log(fileSystem.canExecute("/path/to/file"));
+   */
+  public canExecute(path: string): boolean {
+    if (!this.isMMRL) return false;
+    if (!this.hasRequiredVersion(this.advancedFsOperations)) {
+      return this._unsupportedWarning("canExecute");
+    }
+
+    return this.interface.canExecute(path);
+  }
+
+  /**
+   * Checks if a file or directory can be read.
+   * @param {string} path - The path to the file or directory.
+   * @returns {boolean} True if the file or directory can be read, otherwise false.
+   * @example
+   * console.log(fileSystem.canRead("/path/to/file"));
+   */
+  public canRead(path: string): boolean {
+    if (!this.isMMRL) return false;
+    if (!this.hasRequiredVersion(this.advancedFsOperations)) {
+      return this._unsupportedWarning("canRead");
+    }
+
+    return this.interface.canRead(path);
+  }
+
+  /**
+   * Checks if a file or directory is hidden.
+   * @param {string} path - The path to the file or directory.
+   * @returns {boolean} True if the file or directory is hidden, otherwise false.
+   * @example
+   * console.log(fileSystem.isHidden("/path/to/file"));
+   */
+  public isHidden(path: string): boolean {
+    if (!this.isMMRL) return false;
+    if (!this.hasRequiredVersion(this.advancedFsOperations)) {
+      return this._unsupportedWarning("isHidden");
+    }
+
+    return this.interface.isHidden(path);
   }
 }
 
