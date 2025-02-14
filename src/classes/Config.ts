@@ -39,8 +39,8 @@ export class Config {
     return JSON.parse(fileContent);
   }
 
-  public get(key: string) {
-    return _.get(this.config, key);
+  public get(key: string, def: string) {
+    return _.get(this.config, key, def);
   }
 
   public set(key: string, value: any) {
